@@ -38,20 +38,36 @@ ecsi
 # Mô tả các criteria indexs của model:
 ```{r}
 names(ecsi)
+```
 
+```{r}
 #Xuất R^2 của model
 rSquared(ecsi)
+```
 
+```{r}
 #Xuất path coeffection 
 pC <- pathCoeff(ecsi)
 print(pC, abbreviate = TRUE, minlength = 3)
+```
+
+```{r}
 #Xuất total effect:
 tE <- totalEffects(ecsi)
 print(print(tE, abbreviate = TRUE, minlength = 3))
 ```
 
 
+```{r}
+#Xuất kết quả outer weights:
+plsWeights(ecsi)
+```
 
+```{r}
+#Xuất kết quả loadings của model:
+plsLoadings(ecsi)
+```
+-->Chỉ số loadings có thể dùng để check discriminant validity.(Cho plsLoadings() vào object và print thêm argument reldiff=0.2)
 # Booptrap to estimate
 ```{r}
 #Using booptrap method to estimate outer loadings and path coefficients
@@ -59,6 +75,21 @@ set.seed(123)
 ecsiBoot <- bootsempls(ecsi, nboot = 500, start = "ones", verbose = FALSE)
 ecsiBoot
 ```
+
+
+```{r}
+#Plotting 
+densityplot(ecsi, use = "residuals")
+```
+
+
+```{r}
+#Calculating confidence intervals based on the percentile method
+ecsiBootsummary <- summary(ecsiBoot, type = "bca", level = 0.9)
+ecsiBootsummary
+```
+
+
 ```{r}
 #Plotting kernel density estimates:
 densityplot(ecsiBoot, pattern = "beta")
@@ -70,9 +101,5 @@ parallelplot(ecsiBoot,
              alpha = 0.3, 
              type = "bca",
              main = "Path Coefficients\nof 500 bootstrap samples")
-```
-```{r}
-#Calculating confidence intervals based on the percentile method
-ecsiBootsummary <- summary(ecsiBoot, type = "bca", level = 0.9)
-ecsiBootsummary
+
 ```
