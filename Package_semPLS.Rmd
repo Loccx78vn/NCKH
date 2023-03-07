@@ -1,0 +1,78 @@
+---
+title: 'Implementing semPLS'
+author: "Lộc"
+date: "2023-03-07"
+output: html_document
+---
+#Nhập dữ liệu
+```{r}
+library("semPLS")
+data("ECSIsm")
+data("ECSImm")
+data("mobi")
+```
+
+```{r}
+ECSImm[ECSImm[, 1] == "Expectation",2:1]
+```
+```{r,warning=T}
+#Creating an object suited for use with the fitting function sempls:
+ECSI <- plsm(data = mobi, strucmod = ECSIsm, measuremod = ECSImm)
+
+mvpairs(model = ECSI, data = mobi, LVs = "Expectation")
+
+ecsi <- sempls(model = ECSI, data = mobi, wscheme = "centroid")
+```
+
+```{r}
+#Display graphic
+pathDiagram(ecsi, 
+            file = "ecsiStructure", 
+            full = FALSE, #only the structural model is processed.
+            edge.labels = "both", #names of the parameters and values are both printed
+            output.type = "graphics", #
+            digits = 2,
+            graphics.fmt = "pdf")
+ecsi
+```
+# Mô tả các criteria indexs của model:
+```{r}
+names(ecsi)
+
+#Xuất R^2 của model
+rSquared(ecsi)
+
+#Xuất path coeffection 
+pC <- pathCoeff(ecsi)
+print(pC, abbreviate = TRUE, minlength = 3)
+#Xuất total effect:
+tE <- totalEffects(ecsi)
+print(print(tE, abbreviate = TRUE, minlength = 3))
+```
+
+
+
+# Booptrap to estimate
+```{r}
+#Using booptrap method to estimate outer loadings and path coefficients
+set.seed(123)
+ecsiBoot <- bootsempls(ecsi, nboot = 500, start = "ones", verbose = FALSE)
+ecsiBoot
+```
+```{r}
+#Plotting kernel density estimates:
+densityplot(ecsiBoot, pattern = "beta")
+
+#Plotting parallel coordinates:
+parallelplot(ecsiBoot, 
+             pattern = "beta", 
+             reflinesAt = c(0, 0.5),
+             alpha = 0.3, 
+             type = "bca",
+             main = "Path Coefficients\nof 500 bootstrap samples")
+```
+```{r}
+#Calculating confidence intervals based on the percentile method
+ecsiBootsummary <- summary(ecsiBoot, type = "bca", level = 0.9)
+ecsiBootsummary
+```
