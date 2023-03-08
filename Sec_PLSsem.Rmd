@@ -1,0 +1,97 @@
+---
+title: "Sec_PLSsem"
+author: "Lộc"
+date: "2023-03-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#Call packages:
+library("plspm")
+data("mobi")
+```
+
+
+# Define structure model:
+```{r,warning=T}
+#Add data frame contain adjacency_matrix:
+Adjacency_matrix <- read_excel("~/Adjacency matrix.xlsx")
+
+#Transform dataframe to matrix:
+Adjacency_matrix<-Adjacency_matrix %>% select(-(...1))
+
+ecsism<-data.matrix(Adjacency_matrix)
+
+rownames(ecsism) <- colnames(ecsism)
+
+#Graph structural model 
+innerplot(ecsism) + title("Inner model")
+```
+# Define measurement model:
+```{r}
+# define latent variable associated with:
+ecsi_blocks <- list(11:15, 
+                    1:3, 
+                    16:22, 
+                    17:18, 
+                    4:6, 
+                    7, 
+                    8:10)
+
+# vector of modes (reflective)
+ecsi_modes <- c(rep("A",7))
+
+# run plspm analysis
+ecsi_pls <- plspm(Data = mobi, 
+                  path_matrix = ecsism, 
+                  blocks = ecsi_blocks, 
+                  modes = ecsi_modes)
+
+ecsi_pls
+```
+# Xuất KQ model:
+```{r}
+#outer model
+ecsi_pls$outer_model
+
+#crossloadings
+ecsi_pls$crossloadings
+```
+
+
+```{r}
+#path coefficients:
+ecsi_pls$path_coefs  
+```
+```{r}
+#Graph measurement model:
+plot(ecsi_pls, what = "loadings")
+```
+# Interpretation:
+```{r}
+#Check Unidimensionality (tính đơn chiều) of data:
+ecsi_pls$unidim
+```
+Có 3 cách để kiếm tra:
++Chỉ số cronbach’s alpha > 0.7 thì acceptable.  
++Chỉ số DillonGoldstein’s rho >0.7 thì acceptable.
++Chỉ số first eigenvalue > 1 và second eigenvalue <1 thì acceptable.
+
+# Structure model:
+```{r}
+#Inner model
+ecsi_pls$inner_model
+
+#Redundancy measures:
+ecsi_pls$inner_summary
+```
+
+```{r}
+#Good of Fix:
+ecsi_pls$gof
+```

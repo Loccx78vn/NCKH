@@ -4,21 +4,21 @@ author: "Lộc"
 date: "2023-03-07"
 output: html_document
 ---
-#Nhập dữ liệu
+# Nhập dữ liệu
 ```{r}
 library("semPLS")
-data("ECSIsm")
-data("ECSImm")
 data("mobi")
+data("ECSImm")
+data("ECSIsm")
 ```
 
-```{r}
-ECSImm[ECSImm[, 1] == "Expectation",2:1]
-```
+# Tạo biến PLS sem:
 ```{r,warning=T}
 #Creating an object suited for use with the fitting function sempls:
 ECSI <- plsm(data = mobi, strucmod = ECSIsm, measuremod = ECSImm)
-
+names(ECSI)
+```
+```{r}
 mvpairs(model = ECSI, data = mobi, LVs = "Expectation")
 
 ecsi <- sempls(model = ECSI, data = mobi, wscheme = "centroid")
@@ -35,6 +35,7 @@ pathDiagram(ecsi,
             graphics.fmt = "pdf")
 ecsi
 ```
+
 # Mô tả các criteria indexs của model:
 ```{r}
 names(ecsi)
@@ -43,6 +44,9 @@ names(ecsi)
 ```{r}
 #Xuất R^2 của model
 rSquared(ecsi)
+
+#Xuất giá trị Dillon-Goldstein's rho
+dgrho(ecsi)
 ```
 
 ```{r}
@@ -54,7 +58,7 @@ print(pC, abbreviate = TRUE, minlength = 3)
 ```{r}
 #Xuất total effect:
 tE <- totalEffects(ecsi)
-print(print(tE, abbreviate = TRUE, minlength = 3))
+print(tE, abbreviate = TRUE, minlength = 3)
 ```
 
 
@@ -65,9 +69,18 @@ plsWeights(ecsi)
 
 ```{r}
 #Xuất kết quả loadings của model:
+lE<-plsLoadings(ecsi)
+print(lE,abbreviate = TRUE, minlength = 3,reldiff=0.2)
+
+```
+```{r}
 plsLoadings(ecsi)
 ```
 -->Chỉ số loadings có thể dùng để check discriminant validity.(Cho plsLoadings() vào object và print thêm argument reldiff=0.2)
+
+```{r}
+ecsi$cross_loadings
+```
 # Booptrap to estimate
 ```{r}
 #Using booptrap method to estimate outer loadings and path coefficients
